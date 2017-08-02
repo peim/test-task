@@ -1,16 +1,25 @@
 package com.peim;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.concurrent.*;
 
 public class EventProcessor {
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
+    private DelayQueue<Event> workQueue = new DelayQueue<>();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public synchronized ScheduledFuture<Integer> processEvent(LocalDateTime time, Callable<Integer> task) {
-        long taskStartTime = time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long delay = taskStartTime - System.currentTimeMillis();
-        return executor.schedule(task, delay, TimeUnit.MILLISECONDS);
+    public void process() {
+        while (true) {
+            try {
+                Event event = workQueue.take();
+                executor.submit(event.getTask());
+                System.out.println(event);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void addEvent(Event event) {
+        workQueue.add(event);
     }
 }

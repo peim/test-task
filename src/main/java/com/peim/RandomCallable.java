@@ -7,6 +7,7 @@ public class RandomCallable implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        return new Random().nextInt();
+        int random = new Random().nextInt();
+        return random;
     }
 }
